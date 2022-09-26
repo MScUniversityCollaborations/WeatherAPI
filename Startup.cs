@@ -1,19 +1,18 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
+using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Polly;
 
-namespace MakingHttpRequest
+namespace WeatherAPI
 {
     public class Startup
     {
@@ -27,8 +26,23 @@ namespace MakingHttpRequest
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            services.AddControllers(options =>
+            {
+                options.Filters.Add(new ActionAsyncFilterAttribute(""));
+            });
+
+            services.AddHealthChecksUI()
+                .AddInMemoryStorage()
+                .Services
+                .AddHealthChecks()
+                .AddApplicationInsightsPublisher();
+                // .AddUrlGroup(new Uri("http://api.weatherapi.com/v1/current.json"),"WeatherPI", HealthStatus.Degraded); 
+
+            services.AddHealthChecksUI()
+                .AddInMemoryStorage();
+            
             var timeout = Policy.TimeoutAsync<HttpResponseMessage>(TimeSpan.FromSeconds(5));
+            
             services.AddHttpClient<IWeatherService, WeatherService>(c =>
             {
                 c.BaseAddress = new Uri("http://api.weatherapi.com/v1/current.json");
@@ -54,16 +68,49 @@ namespace MakingHttpRequest
                 app.UseDeveloperExceptionPage();
             }
 
+            /*app.UseHealthChecks("/health");*/
+            
             app.UseHttpsRedirection();
 
             app.UseRouting();
 
             app.UseAuthorization();
 
+            app.UseHealthChecks("/healthcheck", new HealthCheckOptions
+            {
+                Predicate = _ => true,
+                ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse //nuget: AspNetCore.HealthChecks.UI.Client
+            });
+    
+            //nuget: AspNetCore.HealthChecks.UI
+            app.UseHealthChecksUI(options =>
+            {
+                options.UIPath = "/healthchecks-ui";
+                options.ApiPath = "/health-ui-api";
+            });
+            
             app.UseEndpoints(endpoints =>
             {
+                /*endpoints.MapHealthChecks("api/health");
+                endpoints.MapHealthChecksUI(config => {
+                        config.UIPath = "/hc-ui";
+                    });*/
+                
                 endpoints.MapControllers();
             });
         }
+        
+        /*public class RandomHealthCheck : IHealthCheck
+        {
+            public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
+            {
+                if (DateTime.UtcNow.Minute % 2 == 0)
+                {
+                    return Task.FromResult(HealthCheckResult.Healthy());
+                }
+
+                return Task.FromResult(HealthCheckResult.Unhealthy(description: "failed"));
+            }
+        }*/
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace MakingHttpRequest
+namespace WeatherAPI
 {
     public static class ApiServicesExtensions
     {

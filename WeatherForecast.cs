@@ -1,6 +1,6 @@
 using System;
 
-namespace MakingHttpRequest
+namespace WeatherAPI
 {
     public class WeatherForecast
     {

@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
-namespace MakingHttpRequest.Controllers
+namespace WeatherAPI.Controllers
 {
     [ApiController]
     [Route("[controller]")]
+    [ActionAsyncFilter("Controller")]
     public class WeatherForecastController : ControllerBase
     {
         private readonly ILogger<WeatherForecastController> _logger;
@@ -22,6 +23,7 @@ namespace MakingHttpRequest.Controllers
         }
 
         [HttpGet]
+        [ActionAsyncFilter("GET")]
         public async Task<string> Get(string cityName)
         {
             return await _weatherService.Get(cityName);

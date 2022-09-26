@@ -17,7 +17,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "MakingHttpRequest": {
+    "WeatherAPI": {
       "commandName": "Project",
       "launchBrowser": true,
       "launchUrl": "weatherforecast?cityName=Piraeus",
