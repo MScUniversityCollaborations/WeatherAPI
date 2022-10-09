@@ -36,7 +36,7 @@ namespace WeatherAPI
                 .Services
                 .AddHealthChecks()
                 .AddApplicationInsightsPublisher();
-                // .AddUrlGroup(new Uri("http://api.weatherapi.com/v1/current.json"),"WeatherPI", HealthStatus.Degraded); 
+                //.AddUrlGroup(new Uri("http://api.weatherapi.com/v1/current.json"),"WeatherAPI"); 
 
             services.AddHealthChecksUI()
                 .AddInMemoryStorage();
